@@ -432,3 +432,27 @@
     padding-right: 0;
     border-right: none;
 }
+
+.course-finder-form {
+    max-width: 800px;
+}
+
+.course-favorite-icon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+}
+
+.course-favorite-icon .fa-heart {
+    padding: 5px;
+    background: #ffffffdb;
+    border-radius: 0 0 0 20px;
+}
+
+.collapsible {
+    cursor: pointer;
+}
+.no-event {
+    pointer-events: none;
+}
