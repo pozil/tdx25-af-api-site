@@ -208,7 +208,7 @@ export default class AgentApiClient {
   }
 
   #getBaseApiUrl() {
-    return `${this.#authInfo.apiInstanceUrl}/einstein/ai-agent/tar/v1`;
+    return `${this.#authInfo.apiInstanceUrl}/einstein/ai-agent/v1`;
   }
 
   #getHeadersWithAuth() {
