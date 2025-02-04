@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import path from "path";
-import * as dotenv from 'dotenv';
+import * as dotenv from "dotenv";
 
 import WebSocketService from "./server/WebSocketService.js";
 import AgentApiClient from "./server/AgentApiClient.js";
@@ -27,13 +27,13 @@ async function executePrompt(ws, prompt) {
       sessionId,
       prompt,
       [],
-      ({data, event}) => {
+      ({ data, event }) => {
         const eventData = JSON.parse(data);
 
-        const message = { type: 'prompt-response', data: eventData };
+        const message = { type: "prompt-response", data: eventData };
         ws.send(JSON.stringify(message));
-        
-        console.log('Event: %s', event);
+
+        console.log("Event: %s", event);
         console.log(JSON.stringify(eventData, null, 2));
       },
       async () => {
@@ -45,11 +45,7 @@ async function executePrompt(ws, prompt) {
   }
 }
 
-
-
 const start = async () => {
-  
-
   const fastify = Fastify({
     logger: true,
   });
@@ -69,8 +65,7 @@ const start = async () => {
       fastify.get(
         "/websockets",
         { websocket: true },
-        (socket /* WebSocket */, req /* FastifyRequest */) => {
-        }
+        (socket /* WebSocket */, req /* FastifyRequest */) => {}
       );
     });
 
@@ -80,11 +75,10 @@ const start = async () => {
     });
 
     wss.addMessageListener((ws, data) => {
-      if (data.type === 'prompt') {
+      if (data.type === "prompt") {
         executePrompt(ws, data.prompt);
       }
     });
-
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

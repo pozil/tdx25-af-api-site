@@ -133,32 +133,43 @@
             Help Me Decide
           </h6>
         </div>
-        <form class="course-finder-form m-auto collapse" id="collapseHelp">
-          <div class="row mb-3">
-            <label for="about" class="form-label"
-              >Tell us about yourself. Our counseling agent will do the
-              rest.</label
-            >
-            <textarea class="form-control" id="about" rows="3" required>Can you recommend some courses for web design?</textarea>
-          </div>
-          <div class="row mb-3">
-            <div class="col-sm-10">
-              <div class="form-check">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  checked
-                  id="usePref"
-                />
-                <label class="form-check-label" for="usePref">
-                  Tailor recommendations based on your favorite courses
-                </label>
+        <div class="collapse" id="collapseHelp">
+          <form class="course-finder-form m-auto">
+            <div class="row mb-3">
+              <label for="about" class="form-label"
+                >Tell us about yourself. Our counseling agent will do the
+                rest.</label
+              >
+              <textarea class="form-control" id="about" rows="3" required>Can you recommend some courses for web design?</textarea>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-10">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    checked
+                    id="usePref"
+                  />
+                  <label class="form-check-label" for="usePref">
+                    Tailor recommendations based on your favorite courses
+                  </label>
+                </div>
               </div>
             </div>
+            <button type="submit" class="btn btn-primary">Help Me Decide</button>
+          </form>
+          
+          <div class="course-finder-form-spinner d-none d-flex justify-content-center align-items-center py-5 my-5 text-primary">
+            <div class="spinner-border me-3" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span class="loading-message">Loading...</span>
           </div>
-          <button type="submit" class="btn btn-primary">Help Me Decide</button>
-        </form>
-        <div id="prompt-response"></div>
+  
+          <div id="prompt-response"></div>
+          <button id="resume-search" type="button" class="btn btn-primary mt-3 d-none">Resume Search</button>
+        </div>
       </div>
     </div>
     <!-- Help me decide Start -->

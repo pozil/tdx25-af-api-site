@@ -207,14 +207,25 @@ function handleWsMessage(message) {
   console.log(message);
   // Handle prompt response
   if (message.type === "prompt-response") {
-    const textEl = document.createElement("DIV");
-    const formattedMessage = message.data.message.message
-      ?.replaceAll(`\n`, "<br/>")
-      .replaceAll("   ", "&emsp;");
-    let htmlOutput = message.data.message.type;
-    if (formattedMessage) htmlOutput += ": " + formattedMessage;
-    textEl.innerHTML = htmlOutput;
-    document.querySelector("#prompt-response").appendChild(textEl);
+    const promptMessageType = message.data.message.type;
+    switch (promptMessageType) {
+      case "ProgressIndicator":
+        const loadingMessageEl = document.querySelector(".loading-message");
+        loadingMessageEl.innerText = `${message.data.message.message}...`;
+        break;
+      case "Inform":
+        const textEl = document.createElement("DIV");
+        const formattedMessage = message.data.message.message
+          .replaceAll(`\n`, "<br/>")
+          .replaceAll("   ", "&emsp;");
+        textEl.innerHTML = formattedMessage;
+        document.querySelector("#prompt-response").appendChild(textEl);
+        break;
+      case "EndOfTurn":
+        $(".course-finder-form-spinner").fadeOut().addClass("d-none");
+        document.querySelector("#resume-search").classList.toggle("d-none");
+        break;
+    }
   }
 }
 
@@ -222,14 +233,36 @@ function handleWsMessage(message) {
 document
   .querySelector("form.course-finder-form")
   ?.addEventListener("submit", (event) => {
+    // Disable form
     event.preventDefault();
-    const prompt = event.target.querySelector("textarea").value;
+    const form = event.target;
+    form.querySelector("button[type='submit']").disabled = true;
+    form.querySelector("input[type='checkbox']").disabled = true;
+    const promptEl = form.querySelector("textarea");
+    promptEl.disabled = true;
+
+    // Display spinner
+    $(form).fadeOut();
+    $(".course-finder-form-spinner").fadeIn().removeClass("d-none");
 
     // Run prompt
-    console.log(`Sending user prompt: ${prompt}`);
-    const message = { type: "prompt", prompt };
+    console.log(`Sending user prompt: ${promptEl.value}`);
+    const message = { type: "prompt", prompt: promptEl.value };
     ws.send(JSON.stringify(message));
   });
+
+const resumeSearchButton = document.querySelector("#resume-search");
+resumeSearchButton?.addEventListener("click", (event) => {
+  resumeSearchButton.classList.toggle("d-none");
+  const form = document.querySelector("form.course-finder-form");
+  $(form).fadeIn();
+  form.querySelector("button[type='submit']").disabled = false;
+  form.querySelector("input[type='checkbox']").disabled = false;
+  const promptEl = form.querySelector("textarea");
+  promptEl.disabled = false;
+  promptEl.value = "";
+  document.querySelector("#prompt-response").childNodes.forEach(node => node.remove());
+});
 
 // Load courses
 loadCourses();
