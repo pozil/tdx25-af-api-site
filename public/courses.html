@@ -140,7 +140,7 @@
                 >Tell us about yourself. Our counseling agent will do the
                 rest.</label
               >
-              <textarea class="form-control" id="about" rows="3" required>Can you recommend some courses for web design?</textarea>
+              <textarea class="form-control" id="about" rows="3" required>Can you recommend some AI courses that last two hours?</textarea>
             </div>
             <div class="row mb-3">
               <div class="col-sm-10">
@@ -149,15 +149,40 @@
                     class="form-check-input"
                     type="checkbox"
                     checked
-                    id="usePref"
+                    id="useFavorites"
                   />
-                  <label class="form-check-label" for="usePref">
+                  <label class="form-check-label" for="useFavorites">
                     Tailor recommendations based on your favorite courses
                   </label>
                 </div>
               </div>
             </div>
-            <button type="submit" class="btn btn-primary">Help Me Decide</button>
+            <div class="row mb-2">
+              <div class="col-sm-10">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    checked
+                    id="useSocial"
+                  />
+                  <label class="form-check-label" for="useSocial">
+                    Tailor recommendations based on third party accounts
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="row mb-3 mx-5">
+              <div class="col d-flex align-items-center">
+                <i class="fab fa-linkedin fs-4 me-1"></i> LinkedIn profile connected <i class="fas fa-check-circle text-primary ms-1"></i>
+              </div>
+              <div class="col d-flex align-items-center">
+                <i class="fab fa-github fs-4 me-1"></i> GitHub profile connected <i class="fas fa-check-circle text-primary ms-1"></i>
+              </div>
+            </div>
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary">Help Me Decide</button>
+            </div>
           </form>
           
           <div class="course-finder-form-spinner d-none d-flex justify-content-center align-items-center py-5 my-5 text-primary">
