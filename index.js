@@ -23,7 +23,7 @@ async function executePrompt(ws, prompt) {
   await client.authenticate();
   const sessionId = await client.createSession();
   try {
-    const eventSource = await client.sendStreamingMessage(
+    const eventSource = client.sendStreamingMessage(
       sessionId,
       prompt,
       [],

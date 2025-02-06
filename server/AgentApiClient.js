@@ -1,16 +1,54 @@
 import crypto from "crypto";
 import { createEventSource } from "eventsource-client";
 
+const REQUIRED_CONFIG = ["instanceUrl", "clientId", "clientSecret", "agentId"];
 const REQUIRED_SCOPES = new Set(["sfap_api", "chatbot_api", "api"]);
+
+/**
+ * @typedef {Object} Config
+ * @property {string} instanceUrl Your Salesforce Org domain
+ * @property {string} clientId Connected app consumer key
+ * @property {string} clientSecret Connected app consumer secret
+ * @property {string} agentId Agent ID
+ */
+
+/**
+ * @callback MessageCallback
+ * @param {Object} message
+ * @param {string} message.event
+ * @param {Object} message.data
+ * @returns {void}
+ */
+
+/**
+ * @callback DisconnectCallback
+ * @returns {void}
+ */
 
 export default class AgentApiClient {
   #config;
   #authInfo;
 
+  /**
+   * Configures an Agent API client
+   * @param {Config} config 
+   */
   constructor(config) {
+    if (!config) {
+      throw new Error('Missing configuration');
+    }
+    REQUIRED_CONFIG.forEach(key => {
+      if (config[key] === undefined) {
+        throw new Error(`Missing mandatory configuration key: ${key}`);
+      }
+    });
     this.#config = config;
   }
 
+  /**
+   * Authenticates with Salesforce
+   * @returns {Promise<void>} Promise that resolves once the client is authenticated
+   */
   async authenticate() {
     try {
       const headers = {
@@ -62,6 +100,10 @@ export default class AgentApiClient {
     }
   }
 
+  /**
+   * Creates an agent session
+   * @returns {Promise<string>} Promise that holds the session ID
+   */
   async createSession() {
     try {
       const externalSessionKey = crypto.randomUUID();
@@ -100,6 +142,13 @@ export default class AgentApiClient {
     }
   }
 
+  /**
+   * Sends a synchronous prompt to the agent
+   * @param {string} sessionId agent session ID
+   * @param {string} text user prompt
+   * @param {Object[]} [variables] optional context variables
+   * @returns {Promise<any>} Promise that holds the agent response
+   */
   async sendSyncMessage(sessionId, text, variables = []) {
     try {
       const sequenceId = new Date().getTime();
@@ -141,7 +190,16 @@ export default class AgentApiClient {
     }
   }
 
-  async sendStreamingMessage(
+  /**
+   * Sends an asynchronous prompt to the agent
+   * @param {string} sessionId agent session ID
+   * @param {string} text user prompt
+   * @param {Object[]} [variables] optional context variables
+   * @param {MessageCallback} onMessage message callback function
+   * @param {DisconnectCallback} [onDisconnect] optional disconnect callback function
+   * @returns {EventSource} a SSE event source
+   */
+  sendStreamingMessage(
     sessionId,
     text,
     variables = [],
@@ -182,6 +240,11 @@ export default class AgentApiClient {
     }
   }
 
+  /**
+   * Closes the agent session
+   * @param {string} sessionId session ID
+   * @returns {Promise<void>} Promise that resolves once the session is closed
+   */
   async closeSession(sessionId) {
     try {
       const headers = this.#getHeadersWithAuth();
@@ -206,6 +269,14 @@ export default class AgentApiClient {
     }
   }
 
+  /**
+   * Submits feedback to the agent
+   * @param {string} sessionId session ID
+   * @param {string} feedbackId feedback ID
+   * @param {string} feedback feedback type (GOOD or BAD)
+   * @param {string} [feedbackText] optional feedback text
+   * @returns {Promise<void>} Promise that resolves once the feedback is saved
+   */
   async submitFeedback(sessionId, feedbackId, feedback, feedbackText) {
     try {
       const body = {
