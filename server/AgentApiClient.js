@@ -72,8 +72,7 @@ export default class AgentApiClient {
         },
         streamingCapabilities: {
           chunkTypes: ["Text"],
-        },
-        //bypassUser: true,
+        }
       });
 
       const headers = this.#getHeadersWithAuth();
@@ -192,7 +191,7 @@ export default class AgentApiClient {
         `${this.#getBaseApiUrl()}/sessions/${sessionId}`,
         {
           method: "DELETE",
-          headers,
+          headers
         }
       );
       if (!response.ok) {
@@ -204,6 +203,38 @@ export default class AgentApiClient {
       console.log(`Agent API: closed session ${sessionId}`);
     } catch (error) {
       console.log("DELETE SESSION ERROR:", error);
+    }
+  }
+
+  async submitFeedback(sessionId, feedbackId, feedback, feedbackText) {
+    try {
+      const body = {
+        feedbackId,
+        feedback
+      };
+      if (feedbackText) {
+        body.text = feedbackText;
+      }
+
+      const headers = this.#getHeadersWithAuth();
+
+      const response = await fetch(
+        `${this.#getBaseApiUrl()}/sessions/${sessionId}/feedback`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify(body)
+        }
+      );
+      if (!response.ok) {
+        const resBody = await response.text();
+        throw new Error(
+          `Response status: ${response.status}\nResponse body: ${resBody}`
+        );
+      }
+      console.log(`Agent API: submitted feedback on session ${sessionId}`);
+    } catch (error) {
+      console.log("FEEDBACK SUBMIT ERROR:", error);
     }
   }
 
