@@ -13,6 +13,14 @@ const REQUIRED_SCOPES = new Set(["sfap_api", "chatbot_api", "api"]);
  */
 
 /**
+ * @typedef {Object} Logger
+ * @property {Function} debug
+ * @property {Function} info
+ * @property {Function} error
+ * @property {Function} warn
+ */
+
+/**
  * @callback MessageCallback
  * @param {Object} message
  * @param {string} message.event
@@ -27,13 +35,15 @@ const REQUIRED_SCOPES = new Set(["sfap_api", "chatbot_api", "api"]);
 
 export default class AgentApiClient {
   #config;
+  #logger;
   #authInfo;
 
   /**
    * Configures an Agent API client
-   * @param {Config} config 
+   * @param {Config} config client configuration
+   * @param {Logger} [logger] an optional custom logger. The client uses the console if no value is supplied.
    */
-  constructor(config) {
+  constructor(config, logger = console) {
     if (!config) {
       throw new Error('Missing configuration');
     }
@@ -43,6 +53,7 @@ export default class AgentApiClient {
       }
     });
     this.#config = config;
+    this.#logger = logger;
   }
 
   /**
@@ -90,13 +101,15 @@ export default class AgentApiClient {
         accessToken: json.access_token,
         apiInstanceUrl: json.api_instance_url,
       };
-      console.log(
+      this.#logger.log(
         `Agent API: authenticated on ${
           this.#config.instanceUrl
         } (API endpoint: ${this.#authInfo.apiInstanceUrl})`
       );
     } catch (error) {
-      console.log("AUTH ERROR:", error);
+      throw new Error('Agent API authentication failure', {
+          cause: error
+      });
     }
   }
 
@@ -135,10 +148,12 @@ export default class AgentApiClient {
         );
       }
       const json = await response.json();
-      console.log(`Agent API: created session ${json.sessionId}`);
+      this.#logger.log(`Agent API: created session ${json.sessionId}`);
       return json.sessionId;
     } catch (error) {
-      console.log("CREATE SESSION ERROR:", error);
+      throw new Error('Failed to create Agent API session', {
+        cause: error
+      });
     }
   }
 
@@ -165,7 +180,7 @@ export default class AgentApiClient {
       headers.append("Content-Type", "application/json");
       headers.append("Accept", "application/json");
 
-      console.log(
+      this.#logger.log(
         `Agent API: sending sync message ${sequenceId} with text: ${text}`
       );
       const response = await fetch(
@@ -183,10 +198,12 @@ export default class AgentApiClient {
         );
       }
       const json = await response.json();
-      console.log(JSON.stringify(json, null, 2));
+      this.#logger.log(JSON.stringify(json, null, 2));
       return json;
     } catch (error) {
-      console.log("SEND SYNC MESSAGE ERROR:", error);
+      throw new Error('Failed to send Agent API sync message', {
+        cause: error
+      });
     }
   }
 
@@ -227,7 +244,7 @@ export default class AgentApiClient {
         body,
         onMessage,
         onDisconnect: () => {
-          console.log("SSE disconnected. Preventing auto reconnect.");
+          this.#logger.log("SSE disconnected. Preventing auto reconnect.");
           es.close();
           if (onDisconnect) {
             onDisconnect();
@@ -236,7 +253,9 @@ export default class AgentApiClient {
       });
       return es;
     } catch (error) {
-      console.log("CREATE SESSION ERROR:", error);
+      throw new Error('Failed to send Agent API streaming message', {
+        cause: error
+      });
     }
   }
 
@@ -263,9 +282,11 @@ export default class AgentApiClient {
           `Response status: ${response.status}\nResponse body: ${resBody}`
         );
       }
-      console.log(`Agent API: closed session ${sessionId}`);
+      this.#logger.log(`Agent API: closed session ${sessionId}`);
     } catch (error) {
-      console.log("DELETE SESSION ERROR:", error);
+      throw new Error('Failed to close Agent API session', {
+        cause: error
+      });
     }
   }
 
@@ -303,9 +324,11 @@ export default class AgentApiClient {
           `Response status: ${response.status}\nResponse body: ${resBody}`
         );
       }
-      console.log(`Agent API: submitted feedback on session ${sessionId}`);
+      this.#logger.log(`Agent API: submitted feedback on session ${sessionId}`);
     } catch (error) {
-      console.log("FEEDBACK SUBMIT ERROR:", error);
+      throw new Error('Failed to submit Agent API feedback', {
+        cause: error
+      });
     }
   }
 
