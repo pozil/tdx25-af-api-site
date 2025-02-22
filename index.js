@@ -1,9 +1,9 @@
 import Fastify from "fastify";
 import path from "path";
 import * as dotenv from "dotenv";
+import AgentApiClient from "salesforce-agent-api-client";
 
 import WebSocketService from "./server/WebSocketService.js";
-import AgentApiClient from "./server/AgentApiClient.js";
 
 // Load config from .env file
 dotenv.config();
