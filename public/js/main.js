@@ -215,7 +215,7 @@ function handleWsMessage(message) {
         break;
       case "Inform":
         const textEl = document.createElement("DIV");
-        const formattedMessage = message.data.message.message
+        const formattedMessage = (message.data.message.message +'\n')
           .replaceAll(/(\d\. )(.+)\n/gm, '$1<a href="#">$2</a>\n')
           .replaceAll(`\n`, "<br/>")
           .replaceAll("   ", "&emsp;");
