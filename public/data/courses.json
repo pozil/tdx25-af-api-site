@@ -13,14 +13,14 @@
   },
   {
     "id": 2,
-    "title": "Graphic Design Essentials: Create Visuals",
-    "stars": 4,
-    "reviewers": 87,
-    "instructor": "David C.",
-    "duration": "1.5 Hrs",
-    "category": "Graphic Design",
-    "capacity": 30,
-    "price": 149,
+    "title": "Discover Generative Artificial Intelligence",
+    "stars": 5,
+    "reviewers": 171,
+    "instructor": "Ivy J.",
+    "duration": "2 Hrs",
+    "category": "Artificial Intelligence (AI)",
+    "capacity": 100,
+    "price": 199,
     "isFavorite": false
   },
   {

@@ -188,45 +188,72 @@ async function loadCourses() {
       clone.querySelector(`.course-${prop}`).textContent = course[prop];
     });
     if (course.isFavorite) {
-      const iconEl = clone.querySelector(".fa-heart");
-      iconEl.classList.remove("text-secondary");
-      iconEl.classList.add("text-primary");
+      const favBtnEl = clone.querySelector(".course-favorite-icon");
+      favBtnEl.classList.remove("text-secondary");
+      favBtnEl.classList.add("text-primary");
     }
     if (course.stars !== 5) {
-      const iconEl = clone.querySelectorAll(".fa-star")[4];
-      iconEl.classList.remove("text-primary");
-      iconEl.classList.add("text-secondary");
+      const starEl = clone.querySelectorAll(".fa-star")[4];
+      starEl.classList.remove("text-primary");
+      starEl.classList.add("text-secondary");
     }
     clone.querySelector(".course-image").src = `img/courses/${course.id}.jpeg`;
     courseContainer.appendChild(clone);
   }
+  // Add favorite helper
+  document.querySelectorAll(".course-favorite-icon").forEach(favBtnEl => {
+    favBtnEl.addEventListener('click', handleFavoriteClick);
+  });
+}
+
+function handleFavoriteClick(event) {
+  // Update fav icon
+  const favBtnEl = event.target;
+  favBtnEl.classList.toggle('text-primary');
+  favBtnEl.classList.toggle('text-secondary');
+  // Run prompt
+  const prompt = 'Give me a summary of the "Discover Generative AI" course';
+  console.log(`Sending user prompt: ${prompt}`);
+  const message = { type: "sync-prompt", prompt };
+  ws.send(JSON.stringify(message));
 }
 
 // Handle WebSocket messages
 function handleWsMessage(message) {
   console.log(message);
-  // Handle prompt response
-  if (message.type === "prompt-response") {
-    const promptMessageType = message.data.message.type;
-    switch (promptMessageType) {
-      case "ProgressIndicator":
-        const loadingMessageEl = document.querySelector(".loading-message");
-        loadingMessageEl.innerText = `${message.data.message.message}...`;
-        break;
-      case "Inform":
-        const textEl = document.createElement("DIV");
-        const formattedMessage = (message.data.message.message +'\n')
-          .replaceAll(/(\d\. )(.+)\n/gm, '$1<a href="#">$2</a>\n')
-          .replaceAll(`\n`, "<br/>")
-          .replaceAll("   ", "&emsp;");
-        textEl.innerHTML = formattedMessage;
-        document.querySelector("#prompt-response").appendChild(textEl);
-        break;
-      case "EndOfTurn":
-        $(".course-finder-form-spinner").fadeOut().addClass("d-none");
-        document.querySelector("#resume-search").classList.toggle("d-none");
-        break;
-    }
+  switch (message.type) {
+    // Handle async prompt response
+    case 'async-prompt-response':
+      const promptMessageType = message.data.message.type;
+      switch (promptMessageType) {
+        case "ProgressIndicator":
+          const loadingMessageEl = document.querySelector(".loading-message");
+          loadingMessageEl.innerText = `${message.data.message.message}...`;
+          break;
+        case "Inform":
+          const textEl = document.createElement("DIV");
+          const formattedMessage = (message.data.message.message +'\n')
+            .replaceAll(/(\d\. )(.+)\n/gm, '$1<a href="#">$2</a>\n')
+            .replaceAll(`\n`, "<br/>")
+            .replaceAll("   ", "&emsp;");
+          textEl.innerHTML = formattedMessage;
+          document.querySelector("#prompt-response").appendChild(textEl);
+          break;
+        case "EndOfTurn":
+          $(".course-finder-form-spinner").fadeOut().addClass("d-none");
+          document.querySelector("#resume-search").classList.toggle("d-none");
+          break;
+      }
+      break;
+    // Handle sync prompt response
+    case 'sync-prompt-response':
+      // Display response as a toast
+      console.log(message.data);
+      const toastEl = document.querySelector('#liveToast');
+      toastEl.querySelector('.toast-body').innerHTML = message.data +'<br/>Click <a href="#">here</a> for similar courses.';
+      const toast = new bootstrap.Toast(toastEl, { autohide: false });
+      toast.show();
+      break;
   }
 }
 
@@ -248,7 +275,7 @@ document
 
     // Run prompt
     console.log(`Sending user prompt: ${promptEl.value}`);
-    const message = { type: "prompt", prompt: promptEl.value };
+    const message = { type: "async-prompt", prompt: promptEl.value };
     ws.send(JSON.stringify(message));
   });
 

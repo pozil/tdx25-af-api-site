@@ -442,6 +442,10 @@
     top: 0;
     right: 0;
     z-index: 10;
+    background-color: transparent;
+    border: none;
+    margin: 0;
+    padding: 0;
 }
 
 .course-favorite-icon .fa-heart {
@@ -450,9 +454,24 @@
     border-radius: 0 0 0 20px;
 }
 
+.course-favorite-icon:hover .fa-heart {
+    background: rgb(255, 255, 255);
+}
+.course-favorite-icon:hover .fa-heart.text-primary {
+    color: rgb(108, 117, 125) !important;
+}
+.course-favorite-icon:hover .fa-heart.text-secondary {
+    color: rgb(6, 187, 204) !important;
+}
+
 .collapsible {
     cursor: pointer;
 }
 .no-event {
     pointer-events: none;
+}
+
+.toaster {
+    padding-top: 6rem !important;
+    z-index: 11;
 }

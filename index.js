@@ -19,7 +19,7 @@ const client = new AgentApiClient(config);
 
 let wss;
 
-async function executePrompt(ws, prompt) {
+async function executeAsyncPrompt(ws, prompt) {
   await client.authenticate();
   const sessionId = await client.createSession();
   try {
@@ -30,7 +30,7 @@ async function executePrompt(ws, prompt) {
       ({ data, event }) => {
         const eventData = JSON.parse(data);
 
-        const message = { type: "prompt-response", data: eventData };
+        const message = { type: "async-prompt-response", data: eventData };
         ws.send(JSON.stringify(message));
 
         console.log("Event: %s", event);
@@ -41,6 +41,21 @@ async function executePrompt(ws, prompt) {
       }
     );
   } catch (error) {
+    await client.closeSession(sessionId);
+  }
+}
+
+async function executeSyncPrompt(ws, prompt) {
+  await client.authenticate();
+  const sessionId = await client.createSession();
+  try {
+    const response = await client.sendSyncMessage(sessionId, prompt);
+    console.log(JSON.stringify(response, null, 2));
+    const message = { type: "sync-prompt-response", data: response.messages[0].message };
+    ws.send(JSON.stringify(message));
+  } catch (error) {
+    console.log(error);
+  } finally {
     await client.closeSession(sessionId);
   }
 }
@@ -75,8 +90,15 @@ const start = async () => {
     });
 
     wss.addMessageListener((ws, data) => {
-      if (data.type === "prompt") {
-        executePrompt(ws, data.prompt);
+      switch (data?.type) {
+        case 'async-prompt':
+          executeAsyncPrompt(ws, data.prompt);
+          break;
+        case 'sync-prompt':
+          executeSyncPrompt(ws, data.prompt);
+          break;
+        default:
+          console.log(`Unknown WS event type ${data.type}`);
       }
     });
   } catch (err) {
